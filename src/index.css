@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest: #1e5128;
+  --color-mint: #4e9f3d;
+  --color-canvas: #f8f9fa;
+  --color-ink: #13201a;
+  --color-muted: #6b7a71;
+  --font-sans: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background-color: #eef2ee;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 430px) {
+    html,
+    body,
+    #root {
+      background-color: #ffffff;
+    }
+  }
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes scan {
+  0% {
+    top: 8%;
+    opacity: 0.25;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 88%;
+    opacity: 0.25;
+  }
+}
+
+@keyframes processing {
+  0% {
+    width: 8%;
+  }
+  50% {
+    width: 68%;
+  }
+  100% {
+    width: 94%;
+  }
+}
+
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(10px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes notice-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-scan {
+  animation: scan 2.4s ease-in-out infinite alternate;
+}
+
+.animate-processing {
+  animation: processing 1.6s ease-out forwards;
+}
+
+.animate-screen-enter {
+  animation: screen-enter 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-notice-enter {
+  animation: notice-enter 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Custom Range Slider matching FitQual AI Figma tokens */
+.fitqual-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: #edf2ed;
+  outline: none;
+}
+
+.fitqual-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #1e5128;
+  border: 3px solid #ffffff;
+  box-shadow: 0 3px 10px rgba(30, 81, 40, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.fitqual-range::-webkit-slider-thumb:hover {
+  background: #4e9f3d;
+  transform: scale(1.06);
+}
+
+.fitqual-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #1e5128;
+  border: 3px solid #ffffff;
+  box-shadow: 0 3px 10px rgba(30, 81, 40, 0.35);
+  cursor: pointer;
+}

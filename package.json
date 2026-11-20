@@ -1,0 +1,34 @@
+{
+  "name": "ptia-fitqual-ai-front",
+  "version": "1.0.0",
+  "description": "Frontend de la aplicación movil FitQual AI",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JUDAMUCH03/ptia-fitqual-ai-front.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/JUDAMUCH03/ptia-fitqual-ai-front/issues"
+  },
+  "homepage": "https://github.com/JUDAMUCH03/ptia-fitqual-ai-front#readme",
+  "dependencies": {
+    "lucide-react": "^1.76.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^6.3.0",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
+  }
+}
