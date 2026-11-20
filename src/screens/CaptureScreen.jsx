@@ -1,17 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
   AlertCircle,
   Camera,
   CheckCircle2,
   ChevronRight,
   HelpCircle,
+  Image as ImageIcon,
   Trash2,
   Utensils,
   UtensilsCrossed,
+  X,
 } from 'lucide-react';
 import Header from '../components/Header';
 import MacroCard from '../components/MacroCard';
+import CameraModal from '../components/CameraModal';
 import { formatKcal } from '../utils/formatters';
+
+const GALLERY_INPUT_ID = 'fitqual-gallery-input';
 
 function formatSavedTime(isoString) {
   try {
@@ -36,11 +41,13 @@ export default function CaptureScreen({
   onDeleteSavedMeal,
   onOpenGuide,
 }) {
-  const fileInputRef = useRef(null);
+  const [showSourceSheet, setShowSourceSheet] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      setShowSourceSheet(false);
       onSelectFile(file);
     }
     // Reset input so choosing the same photo again still triggers onChange
@@ -128,20 +135,19 @@ export default function CaptureScreen({
           </div>
         )}
 
-        {/* File input WITHOUT capture attribute so iOS/Android opens the native Camera + Gallery + Files menu */}
+        {/* Hidden native file input bound via <label htmlFor={GALLERY_INPUT_ID}> for reliable iOS Fototeca/Files */}
         <input
-          ref={fileInputRef}
-          id="fitqual-camera-input"
+          id={GALLERY_INPUT_ID}
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="sr-only"
+          className="hidden"
         />
 
         {/* Primary Capture Action Card styled after Figma Make Dashboard Camera CTA */}
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => setShowSourceSheet(true)}
           className="group relative flex w-full cursor-pointer items-center gap-3.5 overflow-hidden rounded-[24px] bg-forest p-4 text-left text-white shadow-[0_16px_30px_-16px_rgba(30,81,40,0.85)] transition active:scale-[0.98]"
         >
           {/* Decorative translucent mint circle from Figma design */}
@@ -263,6 +269,99 @@ export default function CaptureScreen({
           </section>
         )}
       </main>
+
+      {/* Bottom Action Sheet: Camera (getUserMedia) vs Photo Library (native <label>) */}
+      {showSourceSheet && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Seleccionar origen de foto"
+          className="fixed inset-0 z-40 mx-auto flex max-w-[430px] items-end bg-ink/55"
+          onClick={() => setShowSourceSheet(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="animate-notice-enter w-full rounded-t-[30px] bg-white px-5 pt-3 pb-6 shadow-2xl"
+            style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+          >
+            <div
+              aria-hidden="true"
+              className="mx-auto mb-3.5 h-1 w-10 rounded-full bg-black/15"
+            />
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-[17px] font-extrabold text-ink">
+                  Tomar o subir foto
+                </h2>
+                <p className="text-[12px] font-medium text-muted">
+                  Elige cómo capturar tu alimento
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSourceSheet(false)}
+                aria-label="Cerrar menú"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-canvas text-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSourceSheet(false);
+                  setShowCameraModal(true);
+                }}
+                className="flex h-14 w-full items-center gap-3.5 rounded-2xl bg-forest px-4 text-left text-white transition active:scale-[0.98]"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mint text-white">
+                  <Camera className="h-5 w-5" />
+                </span>
+                <div className="flex-1">
+                  <span className="block text-[14px] font-bold">
+                    Usar cámara en vivo
+                  </span>
+                  <span className="block text-[11px] font-medium text-white/75">
+                    Toma la foto directo desde la app
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-white/75" />
+              </button>
+
+              <label
+                htmlFor={GALLERY_INPUT_ID}
+                className="flex h-14 w-full cursor-pointer items-center gap-3.5 rounded-2xl border border-black/10 bg-canvas px-4 text-left text-ink transition active:scale-[0.98]"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mint/12 text-forest">
+                  <ImageIcon className="h-5 w-5" />
+                </span>
+                <div className="flex-1">
+                  <span className="block text-[14px] font-bold">
+                    Elegir de Fototeca o archivo
+                  </span>
+                  <span className="block text-[11px] font-medium text-muted">
+                    Selecciona una imagen guardada en tu celular
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted" />
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCameraModal && (
+        <CameraModal
+          galleryInputId={GALLERY_INPUT_ID}
+          onCaptureFile={(file) => {
+            setShowCameraModal(false);
+            onSelectFile(file);
+          }}
+          onClose={() => setShowCameraModal(false)}
+        />
+      )}
     </div>
   );
 }
