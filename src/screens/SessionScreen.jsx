@@ -11,7 +11,7 @@ import Header from '../components/Header';
 import MacroCard from '../components/MacroCard';
 import FoodItemRow from '../components/FoodItemRow';
 
-const MEAL_PRESETS = ['Desayuno', 'Almuerzo', 'Cena', 'Snack'];
+import { MEAL_TYPES as MEAL_PRESETS } from '../utils/fitness';
 
 export default function SessionScreen({
   items = [],
@@ -38,7 +38,7 @@ export default function SessionScreen({
   return (
     <div className="animate-screen-enter flex flex-1 flex-col bg-canvas">
       <Header
-        subtitle="Captura secuencial"
+        subtitle="Arma tu comida plato por plato"
         rightSlot={
           <span className="inline-flex items-center gap-1 rounded-full bg-mint/12 px-3 py-1 text-[11px] font-bold text-forest tnum">
             <Check className="h-3 w-3" />
@@ -49,27 +49,15 @@ export default function SessionScreen({
 
       <main className="flex flex-1 flex-col px-5 pt-1 pb-5">
         <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink">
-          Tu comida actual
+          {mealName} en curso
         </h1>
 
         {/* Meal Session Naming Card */}
         {items.length > 0 && (
           <div className="mt-3 rounded-[20px] border border-black/[0.06] bg-white p-3.5 shadow-[0_5px_18px_-14px_rgba(19,32,26,0.3)]">
-            <label
-              htmlFor="meal-session-name"
-              className="block text-[10px] font-bold uppercase tracking-[0.13em] text-muted"
-            >
-              Nombre de esta comida
-            </label>
-            <input
-              id="meal-session-name"
-              type="text"
-              maxLength={40}
-              placeholder="Ej. Almuerzo, Desayuno, Post-entreno..."
-              value={mealName}
-              onChange={(e) => onChangeMealName(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-black/10 bg-canvas px-3 py-2 text-[16px] font-bold text-ink placeholder:font-medium placeholder:text-muted/60 outline-none focus:border-mint"
-            />
+            <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-muted">
+              ¿Qué comida es?
+            </p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               {MEAL_PRESETS.map((preset) => {
                 const isSelected =
@@ -153,7 +141,7 @@ export default function SessionScreen({
             >
               <BookmarkCheck className="h-5 w-5" />
               <span>
-                Guardar &ldquo;{mealName.trim() || 'comida'}&rdquo; y crear nueva
+                Guardar en {mealName}
               </span>
             </button>
           )}
@@ -202,6 +190,7 @@ export default function SessionScreen({
             </div>
           )}
         </div>
+
 
         <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] font-medium leading-snug text-muted">
           <Info className="h-3.5 w-3.5 shrink-0 text-mint" />

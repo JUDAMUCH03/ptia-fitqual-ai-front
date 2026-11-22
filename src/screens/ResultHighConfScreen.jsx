@@ -15,6 +15,8 @@ export default function ResultHighConfScreen({
   initialEstimate,
   imagePreview,
   useMock,
+  decisionSource = 'auto',
+  mealName = 'mi comida',
   onAddToMeal,
   onCancel,
 }) {
@@ -72,7 +74,14 @@ export default function ResultHighConfScreen({
   }, [grams, selectedClassName, initialEstimate, standardGrams, useMock]);
 
   const displayName = formatFoodName(selectedClassName);
-  const confidencePct = formatConfidence(confidence);
+  const hasConfidence = confidence !== null && confidence !== undefined;
+  const confidencePct = hasConfidence ? formatConfidence(confidence) : null;
+  const pillLabel =
+    decisionSource === 'manual' || !hasConfidence
+      ? 'Elegido por ti'
+      : decisionSource === 'top3'
+        ? `${confidencePct}% · elegido por ti`
+        : `Reconocido · ${confidencePct}%`;
 
   const handleConfirmAdd = () => {
     onAddToMeal({
@@ -86,6 +95,7 @@ export default function ResultHighConfScreen({
       carbs_g: estimate?.carbs_g ?? 0,
       fat_g: estimate?.fat_g ?? 0,
       imagePreview,
+      decisionSource,
     });
   };
 
@@ -119,7 +129,7 @@ export default function ResultHighConfScreen({
             </p>
           </div>
           <span className="tnum shrink-0 rounded-full bg-mint/12 px-2.5 py-1 text-[11px] font-extrabold text-forest">
-            {confidencePct}% de confianza
+            {pillLabel}
           </span>
         </div>
       </div>
@@ -158,7 +168,7 @@ export default function ResultHighConfScreen({
             className="flex h-13 w-full items-center justify-center gap-2 rounded-full bg-mint px-5 text-[15px] font-bold text-white shadow-[0_12px_24px_-14px_rgba(78,159,61,0.9)] transition hover:bg-forest active:scale-[0.98]"
           >
             <Plus className="h-5 w-5" />
-            <span>Agregar a mi comida</span>
+            <span>Agregar a {mealName}</span>
           </button>
 
           <button

@@ -1,3 +1,5 @@
+import { FOOD_NAMES_ES } from '../data/foodClasses';
+
 /**
  * Formats a Food-101 / USDA class identifier (e.g. "chicken_curry")
  * into a human-readable Title Case label ("Chicken Curry").
@@ -8,6 +10,9 @@ export function formatFoodName(className) {
   if (!className || typeof className !== 'string') {
     return 'Alimento desconocido';
   }
+
+  const spanish = FOOD_NAMES_ES[className.trim().toLowerCase()];
+  if (spanish) return spanish;
 
   return className
     .trim()

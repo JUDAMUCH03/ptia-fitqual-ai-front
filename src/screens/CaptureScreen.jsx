@@ -6,40 +6,28 @@ import {
   ChevronRight,
   HelpCircle,
   Image as ImageIcon,
-  Trash2,
-  Utensils,
   UtensilsCrossed,
   X,
 } from 'lucide-react';
 import Header from '../components/Header';
 import MacroCard from '../components/MacroCard';
 import CameraModal from '../components/CameraModal';
-import { formatKcal } from '../utils/formatters';
+import { MEAL_TYPES } from '../utils/fitness';
 
 const GALLERY_INPUT_ID = 'fitqual-gallery-input';
-
-function formatSavedTime(isoString) {
-  try {
-    return new Date(isoString).toLocaleTimeString('es-CO', {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  } catch {
-    return '';
-  }
-}
 
 export default function CaptureScreen({
   sessionItems,
   sessionTotals,
-  savedMeals = [],
   savedToast = null,
   errorMessage,
   onClearError,
   onSelectFile,
   onOpenSession,
-  onDeleteSavedMeal,
   onOpenGuide,
+  onStartCapture,
+  mealName,
+  onChangeMealName,
 }) {
   const [showSourceSheet, setShowSourceSheet] = useState(false);
   const [showCameraModal, setShowCameraModal] = useState(false);
@@ -54,10 +42,6 @@ export default function CaptureScreen({
     event.target.value = '';
   };
 
-  const totalSavedKcal = savedMeals.reduce(
-    (sum, meal) => sum + formatKcal(meal?.totals?.kcal ?? 0),
-    0
-  );
 
   return (
     <div className="animate-screen-enter flex flex-1 flex-col bg-white">
@@ -147,7 +131,10 @@ export default function CaptureScreen({
         {/* Primary Capture Action Card styled after Figma Make Dashboard Camera CTA */}
         <button
           type="button"
-          onClick={() => setShowSourceSheet(true)}
+          onClick={() => {
+            onStartCapture?.();
+            setShowSourceSheet(true);
+          }}
           className="group relative flex w-full cursor-pointer items-center gap-3.5 overflow-hidden rounded-[24px] bg-forest p-4 text-left text-white shadow-[0_16px_30px_-16px_rgba(30,81,40,0.85)] transition active:scale-[0.98]"
         >
           {/* Decorative translucent mint circle from Figma design */}
@@ -172,6 +159,30 @@ export default function CaptureScreen({
           <ChevronRight className="relative h-5 w-5 shrink-0 text-white/75 transition-transform group-hover:translate-x-0.5" />
         </button>
 
+        {/* Tipo de comida que se está registrando */}
+        <div>
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+            Estás registrando
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {MEAL_TYPES.map((type) => {
+              const selected = mealName === type;
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => onChangeMealName?.(type)}
+                  className={`rounded-full px-3.5 py-1.5 text-[12px] font-bold transition active:scale-95 ${
+                    selected ? 'bg-forest text-white' : 'border border-black/[0.08] bg-white text-muted'
+                  }`}
+                >
+                  {type}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Session Accumulated Summary Card */}
         <div>
           <div className="mb-2 flex items-center justify-between">
@@ -185,7 +196,7 @@ export default function CaptureScreen({
 
           <MacroCard
             variant="session"
-            title="TU COMIDA ACTUAL"
+            title={`TU ${String(mealName || "comida").toUpperCase()}`}
             kcal={sessionTotals.kcal}
             protein_g={sessionTotals.protein_g}
             carbs_g={sessionTotals.carbs_g}
@@ -208,66 +219,6 @@ export default function CaptureScreen({
           </button>
         )}
 
-        {/* Saved Meals Section (visible once user saves at least 1 named meal) */}
-        {savedMeals.length > 0 && (
-          <section aria-label="Comidas guardadas" className="mt-1">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-[14px] font-extrabold tracking-tight text-ink">
-                Comidas guardadas
-              </h2>
-              <span className="tnum rounded-full bg-mint/12 px-2.5 py-0.5 text-[11px] font-bold text-forest">
-                {totalSavedKcal} kcal hoy
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {savedMeals.map((meal) => {
-                const firstThumb = meal.items?.find((it) => it.imagePreview)?.imagePreview;
-                return (
-                  <div
-                    key={meal.id}
-                    className="flex items-center gap-3 rounded-[20px] border border-black/[0.06] bg-white p-3 shadow-[0_6px_20px_-16px_rgba(19,32,26,0.3)]"
-                  >
-                    {firstThumb ? (
-                      <img
-                        src={firstThumb}
-                        alt={meal.name}
-                        className="h-12 w-12 shrink-0 rounded-xl border border-black/[0.06] object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-mint/10 text-forest">
-                        <Utensils className="h-4 w-4" />
-                      </div>
-                    )}
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-mint">
-                        {meal.name} · {formatSavedTime(meal.savedAt)}
-                      </p>
-                      <p className="truncate text-[13px] font-bold text-ink">
-                        {meal.items?.map((i) => i.displayName).join(' + ')}
-                      </p>
-                      <p className="tnum text-[11px] font-medium text-muted">
-                        {formatKcal(meal.totals?.kcal ?? 0)} kcal ·{' '}
-                        {meal.items?.length ?? 0}{' '}
-                        {meal.items?.length === 1 ? 'alimento' : 'alimentos'}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onDeleteSavedMeal(meal.id)}
-                      aria-label={`Eliminar ${meal.name}`}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100 active:scale-95"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
       </main>
 
       {/* Bottom Action Sheet: Camera (getUserMedia) vs Photo Library (native <label>) */}

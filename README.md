@@ -2,34 +2,36 @@
 
 Asistente nutricional mobile-first impulsado por visión artificial (MobileNetV3 entrenado sobre **Food-101**, 101 clases de alimentos) y porciones de referencia **USDA**.
 
-Diseñado a partir del prototipo de Figma Make (`FitQual AI Mobile App`) siguiendo un flujo funcional de **3 pantallas** para **captura secuencial** sin base de datos (estado en React + persistencia en `sessionStorage`).
+Aplicación de seguimiento nutricional: el usuario crea su perfil, recibe metas diarias de calorías y macronutrientes, registra cada plato con una foto y sigue su progreso. No usa cuentas ni base de datos: el estado vive en React y se guarda en `localStorage`.
 
 ---
 
-## Flujo funcional (Bienvenida + 3 pantallas)
+## Funcionalidades
 
-0. **Pantalla Inicial — Bienvenida (`WelcomeScreen`):**
-   - Presenta la identidad de **FitQual AI**, explica en 3 pasos cómo funciona la captura secuencial por alimento, qué pasa cuando la confianza es menor al 70% y ofrece el CTA **"Comenzar a escanear"** (accesible también luego desde el ícono `?`).
+Navegación con barra inferior: **Hoy · Diario · Registrar (cámara) · Progreso · Perfil**.
 
-1. **Pantalla 1 — Captura y acumulado inicial (`CaptureScreen`):**
-   - Botón principal **"Tomar o subir foto"** (`<input type="file" accept="image/*" capture="environment" />`) que abre la cámara en celular o el selector de archivos.
-   - Overlay `"Analizando alimento..."` mientras se procesa la imagen en `POST /api/predict`.
-   - Tarjeta inferior con el acumulado de la sesión actual (arranca en `0 kcal` y `0g` de proteínas, carbohidratos y grasas).
+- **Onboarding y perfil** (`OnboardingScreen`, `ProfileScreen`): nombre, sexo, edad, estatura, peso, peso meta, nivel de actividad y objetivo (perder, mantener o ganar). La meta de calorías se calcula con la **ecuación de Mifflin-St Jeor** (metabolismo basal × factor de actividad ± ajuste del objetivo). Los macros salen así: proteína por kg de peso, grasa el 25 % de las kcal y carbohidratos el resto. La meta se puede ajustar a mano.
+- **Hoy** (`DashboardScreen`):
+  - Anillo de calorías restantes y barras de proteína, carbos y grasa frente a la meta.
+  - Comidas del día por tipo (desayuno, almuerzo, snack y cena).
+  - Contador de agua y racha de días seguidos.
+  - Tarjeta de estado del día: qué falta y qué comer, meta cumplida (±10 %) o meta superada.
+- **Registrar**: flujo de reconocimiento por foto (ver abajo). Cada plato se suma a la comida elegida y, al guardarla, pasa al diario.
+- **Diario** (`DiaryScreen`): historial día por día; se pueden quitar alimentos o comidas.
+- **Progreso** (`ProgressScreen`):
+  - Calorías de la semana o el mes frente a la meta, promedio diario, días dentro de la meta y proteína promedio.
+  - Distribución de macros.
+  - Peso con gráfica, IMC y avance hacia el peso meta.
+  - Logros desbloqueables.
+- **Celebración** al cumplir la meta del día y avisos al completar el agua o desbloquear un logro.
+- **Exportar diario a CSV** (Perfil): una fila por alimento, con la confianza del modelo, cómo se decidió (`auto`, `top3` o `manual`) y el tiempo que tomó registrarlo.
 
-2. **Pantalla 2a — Confianza alta ($P_{\max} \ge 0.70$) (`ResultHighConfScreen`):**
-   - Foto capturada, nombre formateado del alimento y porcentaje de confianza.
-   - Control de porción en gramos iniciado en `standard_grams` (`-10g` / `+10g`, input numérico y slider).
-   - Recálculo dinámico de `kcal`, `Proteínas`, `Carbohidratos` y `Grasas`.
-   - Botón **"Agregar a mi comida"** (navega a Pantalla 3).
+### Flujo de reconocimiento por foto
 
-3. **Pantalla 2b — Baja confianza ($P_{\max} < 0.70$) (`DisambiguationScreen`):**
-   - Mensaje **"No estoy seguro"** con 3 botones interactivos para el Top-3 y su porcentaje; al tocar cualquiera consulta la porción estándar y pasa a la Pantalla 2a.
-   - Cuarto botón **"Ninguna de estas"** (escape para alimentos fuera de las 101 clases de Food-101, como una arepa) con botón **"Volver a intentar"**.
-
-4. **Pantalla 3 — Sesión de comida (`SessionScreen`):**
-   - Lista de alimentos agregados con gramos, kcal, macros y botón para eliminar cada ítem.
-   - Totales consolidados en tiempo real.
-   - **"+ Agregar otro alimento"** (captura secuencial conservando el acumulado) y **"Nueva comida"** (reinicia la sesión a `0 kcal`).
+1. **Captura (`CaptureScreen`)**: el usuario toma o sube una foto de un plato a la vez y elige la comida a la que pertenece. La imagen se envía a `POST /api/predict`.
+2. **Confianza alta, $P_{\max} \ge 0.70$ (`ResultHighConfScreen`)**: se muestra el plato reconocido con la porción estándar USDA. Los gramos se ajustan con `-10g`/`+10g`, un campo numérico o el slider, y las calorías y macros se recalculan.
+3. **Confianza baja, $P_{\max} < 0.70$ (`DisambiguationScreen`)**: aparecen el mensaje "No estoy seguro" y las 3 opciones más probables. Con **"Ninguna de estas"** se abre una **búsqueda manual** por nombre (en español o inglés) entre las 101 clases, junto con la opción de volver a intentar.
+4. **Comida en curso (`SessionScreen`)**: lista de platos con sus totales. Desde ahí se agrega otro plato o se guarda la comida en el diario.
 
 ---
 
@@ -37,15 +39,20 @@ Diseñado a partir del prototipo de Figma Make (`FitQual AI Mobile App`) siguien
 
 ```text
 src/
-├── components/        # Header, MacroCard, PortionControl, FoodItemRow, AnalyzingOverlay, MockModeFooter
-├── screens/           # CaptureScreen, ResultHighConfScreen, DisambiguationScreen, SessionScreen
+├── components/   # BottomNav, ui (Card, Ring, barras), DayStatusCard, Celebration, Achievements,
+│                 # ManualFoodSearch, MacroCard, PortionControl, FoodItemRow, CameraModal, ...
+├── screens/      # Welcome, Onboarding, Dashboard, Diary, Progress, Profile,
+│                 # Capture, ResultHighConf, Disambiguation, Session
 ├── services/
 │   ├── httpClient.js  # Cliente HTTP base sobre fetch usando VITE_API_URL
 │   └── fitqualApi.js  # checkHealth(), predictFood(imageFile), estimateNutrition(className, grams)
+├── data/
+│   └── foodClasses.js # 101 clases de Food-101 con nombre en español y búsqueda manual
 ├── mocks/
-│   └── mockResponses.js # Respuestas simuladas (Confianza Alta >= 0.70 y Confianza Baja < 0.70)
+│   └── mockResponses.js # Respuestas simuladas (confianza alta y baja)
 └── utils/
-    └── formatters.js  # Formateo Food-101, redondeo de macros, escalado y compresión de miniaturas
+    ├── fitness.js     # Metas (Mifflin-St Jeor), fechas, rachas, progreso, logros y exportación CSV
+    └── formatters.js  # Nombres de platos, redondeo de macros, escalado y compresión de miniaturas
 ```
 
 ---
@@ -84,7 +91,7 @@ Requisitos: **Docker Desktop**, **Node.js** y **Git**.
    ```
 3. Abre `http://localhost:5173/`.
 
-*(Nota: Con `VITE_USE_MOCK=false` —el valor por defecto en producción—, el modo mock queda completamente desactivado y oculto en la interfaz. Solo si deseas probar la UI aislada sin backend, configura `VITE_USE_MOCK=true` en `.env.local`).*
+*(Nota: Con `VITE_USE_MOCK=false` —el valor por defecto en producción—, el modo mock queda completamente desactivado y oculto en la interfaz. Solo si deseas probar la UI aislada sin backend, configura `VITE_USE_MOCK=true` en `.env.local`; el modo demo se activa o desactiva desde **Perfil → Opciones de demostración**).*
 
 ---
 

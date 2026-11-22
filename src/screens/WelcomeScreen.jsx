@@ -8,21 +8,27 @@ import {
 } from 'lucide-react';
 import { FitQualLogo } from '../components/Header';
 
+const MODEL_STATS = [
+  { value: '1 foto', label: 'por plato, sin buscar ni digitar' },
+  { value: '101', label: 'platos reconocidos' },
+  { value: '0', label: 'cuentas: tus datos quedan contigo' },
+];
+
 const STEPS = [
   {
     icon: Camera,
-    title: '1. Toma o sube una foto',
-    description: 'Enfoca un alimento a la vez desde cámara o galería.',
+    title: '1. Crea tu perfil',
+    description: 'Calculamos tus calorías y macros según tu objetivo.',
   },
   {
     icon: SlidersHorizontal,
-    title: '2. Confirma y ajusta gramos',
-    description: 'Si la IA duda (<70%), elige entre 3 opciones o descarta.',
+    title: '2. Fotografía lo que comes',
+    description: 'Un plato a la vez; si no estamos seguros, te damos opciones.',
   },
   {
     icon: Layers,
-    title: '3. Suma en tu comida actual',
-    description: 'Acumula calorías y macros sin crear cuenta.',
+    title: '3. Sigue tu progreso',
+    description: 'Metas diarias, rachas, peso y tu historial semanal.',
   },
 ];
 
@@ -61,7 +67,7 @@ export default function WelcomeScreen({
 
       {/* Middle: Compact Visual Preview + 3-Step Guide */}
       <div className="my-2.5 flex flex-col gap-2.5">
-        <div className="relative flex h-[96px] w-full items-center justify-center overflow-hidden rounded-[22px] bg-gradient-to-br from-[#13201a] via-[#1a3d22] to-[#1e5128] px-4 text-white shadow-[0_12px_28px_-16px_rgba(19,32,26,0.55)]">
+        <div className="relative flex h-[118px] w-full items-center justify-center overflow-hidden rounded-[22px] bg-gradient-to-br from-[#13201a] via-[#1a3d22] to-[#1e5128] px-4 text-white shadow-[0_12px_28px_-16px_rgba(19,32,26,0.55)]">
           <div
             aria-hidden="true"
             className="absolute inset-0 opacity-15"
@@ -82,11 +88,17 @@ export default function WelcomeScreen({
           <div className="relative z-10 flex flex-col items-center text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-md">
               <span className="h-1.5 w-1.5 rounded-full bg-mint" />
-              IA visual · 101 categorías Food-101
+              Tu diario de comidas con una foto
             </span>
-            <p className="mt-1.5 text-[13px] font-bold tracking-tight text-white/95">
-              MobileNetV3 + Porción en gramos
-            </p>
+            {/* Métricas reales del modelo en el test oficial de Food-101 (25.250 fotos) */}
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {MODEL_STATS.map((stat) => (
+                <div key={stat.label} className="min-w-0">
+                  <p className="tnum text-[17px] font-extrabold leading-none text-white">{stat.value}</p>
+                  <p className="mt-1 text-[9px] font-semibold leading-tight text-white/70">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -127,7 +139,7 @@ export default function WelcomeScreen({
           onClick={onStart}
           className="flex h-13 w-full items-center justify-center gap-2 rounded-full bg-forest px-5 text-[15px] font-bold text-white shadow-[0_12px_26px_-12px_rgba(30,81,40,0.75)] transition hover:bg-mint active:scale-[0.98]"
         >
-          <span>Comenzar a escanear</span>
+          <span>Comenzar</span>
           <ArrowRight className="h-4 w-4" />
         </button>
 
@@ -143,7 +155,7 @@ export default function WelcomeScreen({
         )}
 
         <p className="text-center text-[10px] font-medium text-muted">
-          Sin registro · Tu sesión se conserva en este dispositivo
+          Sin registro · Tus datos se guardan en este dispositivo
         </p>
       </div>
     </div>

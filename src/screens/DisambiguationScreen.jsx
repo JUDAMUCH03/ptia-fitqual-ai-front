@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
+import ManualFoodSearch from '../components/ManualFoodSearch';
 import { formatConfidence, formatFoodName } from '../utils/formatters';
 
 export default function DisambiguationScreen({
@@ -83,10 +84,25 @@ export default function DisambiguationScreen({
             </div>
           </div>
 
+          {errorMessage && (
+            <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[12px] font-medium text-red-700">
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="mt-4">
+            <ManualFoodSearch
+              loadingClassName={loadingClassName}
+              onSelect={(className) =>
+                onSelectOption({ class_name: className, confidence: null, source: 'manual' })
+              }
+            />
+          </div>
+
           <button
             type="button"
             onClick={onBack}
-            className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-forest px-5 text-[15px] font-bold text-white shadow-[0_12px_26px_-12px_rgba(30,81,40,0.75)] transition active:scale-[0.98]"
+            className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-forest px-5 text-[15px] font-bold text-white shadow-[0_12px_26px_-12px_rgba(30,81,40,0.75)] transition active:scale-[0.98]"
           >
             <RotateCcw className="h-4 w-4" />
             <span>Volver a intentar</span>
@@ -123,7 +139,7 @@ export default function DisambiguationScreen({
                   key={option.class_name}
                   type="button"
                   disabled={isAnyLoading}
-                  onClick={() => onSelectOption(option)}
+                  onClick={() => onSelectOption({ ...option, source: 'top3' })}
                   className={`group flex w-full flex-col rounded-[22px] border bg-white p-4 text-left shadow-[0_6px_22px_-16px_rgba(19,32,26,0.35)] transition active:scale-[0.98] disabled:opacity-65 ${
                     index === 0
                       ? 'border-mint/60 hover:border-mint'
