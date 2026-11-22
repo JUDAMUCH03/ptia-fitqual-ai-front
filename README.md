@@ -55,53 +55,36 @@ src/
 ### 1. Instalar dependencias y configurar entorno
 ```bash
 npm install
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Variables en `.env`:
+Variables en `.env.local` para conectar con el backend en Docker local:
 ```env
-VITE_API_URL=http://localhost:8000
-VITE_USE_MOCK=true
+VITE_API_URL=http://127.0.0.1:8001
+VITE_USE_MOCK=false
 ```
 
-### 2. Correr en Modo Mock (sin backend encendido)
-Con `VITE_USE_MOCK=true`:
-```bash
-npm run dev
-```
-En el footer discreto de la app puedes alternar entre:
-- **Alta (88%)** (`grilled_salmon`) para probar la Pantalla 2a.
-- **Baja (49%)** (`pizza`, `lasagna`, `hamburger`) para probar la Pantalla 2b y el botón **"Ninguna de estas"**.
+### 2. Conectar Backend + Frontend en local (Docker + Vite)
+Requisitos: **Docker Desktop**, **Node.js** y **Git**.
 
-### 3. Cómo conectar el Backend (repo de Daniel) y este Frontend en local
-
-Como el proyecto usa **dos repositorios independientes** (uno para el backend en Python/FastAPI y este para el frontend en React/Vite):
-
-#### Opción A: Probar en el mismo computador
-1. **En el repo del Backend (Daniel):**
-   - Asegúrate de habilitar `CORSMiddleware` en FastAPI permitiendo `http://localhost:5173`.
-   - Levanta el servidor en el puerto `8000`:
-     ```bash
-     uvicorn app.main:app --reload --port 8000
-     ```
-2. **En este repo del Frontend:**
-   - Configura `.env`:
-     ```env
-     VITE_API_URL=http://localhost:8000
-     VITE_USE_MOCK=false
-     ```
-   - Ejecuta `npm run dev` y abre `http://localhost:5173`.
-
-#### Opción B: Probar desde un celular real en el mismo Wi-Fi (Recomendado)
-Si abres la app en tu celular, `localhost` apuntaría al propio teléfono y no a tu computador. Para evitar problemas de IP y CORS en local:
-1. Levanta el Backend en tu computador en `http://127.0.0.1:8000` (o `0.0.0.0:8000`).
-2. En `.env` de este frontend deja `VITE_API_URL=` vacío (para usar el proxy de `vite.config.js`):
-   ```env
-   VITE_API_URL=
-   VITE_USE_MOCK=false
+1. **En una terminal — Backend ([`ptia-fitqual-ai-back`](https://github.com/DANFELcode/ptia-fitqual-ai-back)):**
+   ```bash
+   git clone https://github.com/DANFELcode/ptia-fitqual-ai-back.git
+   cd ptia-fitqual-ai-back
+   docker build -t fitqual-back .
+   docker run --rm -p 8001:8000 fitqual-back
    ```
-3. Ejecuta `npm run dev` (ya expone `Network: http://<IP-DE-TU-PC>:5173`).
-4. Abre esa URL desde el navegador de tu celular en la misma red Wi-Fi: Vite reenviará automáticamente `/api/*` y `/health` al FastAPI de tu computador.
+2. **En otra terminal — Frontend (`ptia-fitqual-ai-front`):**
+   ```bash
+   git clone https://github.com/JUDAMUCH03/ptia-fitqual-ai-front.git
+   cd ptia-fitqual-ai-front
+   printf "VITE_API_URL=http://127.0.0.1:8001\nVITE_USE_MOCK=false\n" > .env.local
+   npm install
+   npm run dev
+   ```
+3. Abre `http://localhost:5173/`.
+
+*(Nota: Con `VITE_USE_MOCK=false` —el valor por defecto en producción—, el modo mock queda completamente desactivado y oculto en la interfaz. Solo si deseas probar la UI aislada sin backend, configura `VITE_USE_MOCK=true` en `.env.local`).*
 
 ---
 

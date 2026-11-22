@@ -5,11 +5,12 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Reads default mock setting from Vite environment variable VITE_USE_MOCK.
- * Defaults to true when VITE_USE_MOCK is 'true' (case-insensitive).
+ * Defaults to false so production / final builds always use the real backend
+ * unless VITE_USE_MOCK=true is explicitly configured.
  * @returns {boolean}
  */
 export function isMockEnabledByEnv() {
-  const raw = String(import.meta.env.VITE_USE_MOCK ?? 'true').trim().toLowerCase();
+  const raw = String(import.meta.env.VITE_USE_MOCK ?? 'false').trim().toLowerCase();
   return raw === 'true' || raw === '1' || raw === 'yes';
 }
 

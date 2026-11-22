@@ -20,6 +20,29 @@ export class ApiError extends Error {
   }
 }
 
+function extractServerErrorDetail(payload, status) {
+  if (payload && typeof payload === 'object') {
+    const rawDetail = payload.detail ?? payload.message;
+    if (typeof rawDetail === 'string' && rawDetail.trim()) {
+      return rawDetail.trim();
+    }
+    if (Array.isArray(rawDetail) && rawDetail.length > 0) {
+      const joined = rawDetail
+        .map((item) => (typeof item === 'string' ? item : item?.msg || JSON.stringify(item)))
+        .filter(Boolean)
+        .join('. ');
+      if (joined) return joined;
+    }
+    if (rawDetail && typeof rawDetail === 'object') {
+      return rawDetail.message || JSON.stringify(rawDetail);
+    }
+  }
+  if (typeof payload === 'string' && payload.trim()) {
+    return payload.trim();
+  }
+  return `El servidor respondió con estado ${status}.`;
+}
+
 /**
  * Base HTTP client wrapping fetch against VITE_API_URL with timeout and
  * FastAPI-friendly error normalization.
@@ -70,12 +93,9 @@ export async function httpRequest(path, options = {}) {
     const payload = isJson ? await response.json().catch(() => null) : await response.text().catch(() => '');
 
     if (!response.ok) {
-      const serverDetail =
-        (payload && typeof payload === 'object' && (payload.detail || payload.message)) ||
-        (typeof payload === 'string' && payload.trim()) ||
-        `El servidor respondió con estado ${response.status}.`;
+      const serverDetail = extractServerErrorDetail(payload, response.status);
 
-      throw new ApiError(String(serverDetail), {
+      throw new ApiError(serverDetail, {
         status: response.status,
         code: 'HTTP_ERROR',
         details: payload,

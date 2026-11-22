@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Plus, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Info, Plus, RotateCcw } from 'lucide-react';
 import MacroCard from '../components/MacroCard';
 import PortionControl from '../components/PortionControl';
 import { estimateNutrition } from '../services/fitqualApi';
@@ -170,6 +170,13 @@ export default function ResultHighConfScreen({
             <span>Cancelar / Tomar otra</span>
           </button>
         </div>
+
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[10px] font-medium leading-snug text-muted">
+          <Info className="h-3.5 w-3.5 shrink-0 text-mint" />
+          <span>
+            Estimación basada en porciones estándar de USDA; no reemplaza asesoría nutricional.
+          </span>
+        </p>
       </div>
     </div>
   );

@@ -69,8 +69,9 @@ export default function App() {
   });
   const [savedToast, setSavedToast] = useState(null);
 
-  // Mock / API mode state (initialized from VITE_USE_MOCK)
-  const [useMock, setUseMock] = useState(() => isMockEnabledByEnv());
+  // Mock / API mode state (disabled and hidden in final builds when VITE_USE_MOCK=false)
+  const mockAllowedByEnv = isMockEnabledByEnv();
+  const [useMock, setUseMock] = useState(mockAllowedByEnv);
   const [mockScenario, setMockScenario] = useState('high');
   const [apiStatus, setApiStatus] = useState('idle');
 
@@ -367,7 +368,7 @@ export default function App() {
           )}
         </div>
 
-        {screen !== SCREENS.WELCOME && (
+        {mockAllowedByEnv && screen !== SCREENS.WELCOME && (
           <MockModeFooter
             useMock={useMock}
             onToggleMock={handleToggleMock}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   BookmarkCheck,
   Check,
+  Info,
   Plus,
   RefreshCw,
   UtensilsCrossed,
@@ -201,6 +202,13 @@ export default function SessionScreen({
             </div>
           )}
         </div>
+
+        <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] font-medium leading-snug text-muted">
+          <Info className="h-3.5 w-3.5 shrink-0 text-mint" />
+          <span>
+            Estimación basada en porciones estándar de USDA; no reemplaza asesoría nutricional.
+          </span>
+        </p>
       </main>
     </div>
   );
