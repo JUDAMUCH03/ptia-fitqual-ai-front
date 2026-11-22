@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronRight, Download, FlaskConical, Pencil, RotateCcw, Trash2 } from 'lucide-react';
+import TargetsExplainer from '../components/TargetsExplainer';
 import { Card, SectionTitle } from '../components/ui';
 import { ACTIVITY_LEVELS, GOALS, calcBmi, latestWeight } from '../utils/fitness';
 
@@ -153,6 +154,8 @@ export default function ProfileScreen({
             )}
           </Card>
         </div>
+
+        <TargetsExplainer profile={profile} targets={targets} />
 
         <div>
           <SectionTitle>Mis datos y privacidad</SectionTitle>

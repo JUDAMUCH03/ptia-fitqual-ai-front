@@ -11,10 +11,56 @@ export const ACTIVITY_LEVELS = [
   { id: 'very_active', label: 'Muy activo', hint: 'Entrenamiento intenso o trabajo físico', factor: 1.9 },
 ];
 
+// Ajuste por objetivo: déficit de 500 kcal/día (Jensen et al., 2014) y
+// superávit del 10 % sobre el gasto diario (Iraki et al., 2019: 10-20 %).
 export const GOALS = [
-  { id: 'lose', label: 'Perder peso', hint: 'Déficit de ~500 kcal/día', delta: -500 },
-  { id: 'maintain', label: 'Mantener peso', hint: 'Comer lo que gastas', delta: 0 },
-  { id: 'gain', label: 'Ganar masa muscular', hint: 'Superávit de ~300 kcal/día', delta: 300 },
+  { id: 'lose', label: 'Perder peso', hint: 'Déficit de 500 kcal/día', adjust: (tdee) => tdee - 500 },
+  { id: 'maintain', label: 'Mantener peso', hint: 'Comer lo que gastas', adjust: (tdee) => tdee },
+  { id: 'gain', label: 'Ganar masa muscular', hint: 'Superávit del 10 % sobre tu gasto', adjust: (tdee) => tdee * 1.1 },
+];
+
+/** Fuentes de los parámetros con los que se calculan las metas (se muestran en Perfil). */
+export const TARGET_SOURCES = [
+  {
+    topic: 'Metabolismo basal',
+    detail: 'Ecuación de Mifflin-St Jeor.',
+    ref: 'Mifflin et al. (1990). The American Journal of Clinical Nutrition, 51(2), 241–247.',
+  },
+  {
+    topic: 'Precisión de la ecuación',
+    detail: 'La más confiable entre las ecuaciones comparadas: suele acertar dentro de ±10 %.',
+    ref: 'Frankenfield et al. (2005). Journal of the American Dietetic Association, 105(5), 775–789.',
+  },
+  {
+    topic: 'Nivel de actividad',
+    detail: 'Multiplicadores convencionales de 1,2 a 1,9 sobre el metabolismo basal.',
+    ref: 'Referencia: FAO/WHO/UNU (2004). Human energy requirements.',
+  },
+  {
+    topic: 'Perder peso',
+    detail: 'Déficit de 500 kcal/día, con un mínimo de 1.200 kcal (mujeres) o 1.500 kcal (hombres).',
+    ref: 'Jensen et al. (2014). Guía AHA/ACC/TOS para el manejo del sobrepeso y la obesidad.',
+  },
+  {
+    topic: 'Ganar masa muscular',
+    detail: 'Superávit del 10 % sobre el gasto diario (rango recomendado: 10–20 %).',
+    ref: 'Iraki et al. (2019). Sports, 7(7), 154.',
+  },
+  {
+    topic: 'Proteína',
+    detail: '1,6 g/kg para mantener y 2,0 g/kg para perder o ganar (rango: 1,4–2,0 g/kg).',
+    ref: 'Jäger et al. (2017). Journal of the International Society of Sports Nutrition, 14, 20.',
+  },
+  {
+    topic: 'Grasa y carbohidratos',
+    detail: 'Grasa 25 % de las calorías (rango 20–35 %); carbohidratos el resto (rango 45–65 %).',
+    ref: 'Institute of Medicine (2005). Dietary Reference Intakes for Energy, Carbohydrate, Fiber, Fat…',
+  },
+  {
+    topic: 'Agua',
+    detail: '2 litros al día como meta práctica (incluye bebidas).',
+    ref: 'EFSA (2010). Scientific Opinion on Dietary Reference Values for water.',
+  },
 ];
 
 export const MEAL_TYPES = ['Desayuno', 'Almuerzo', 'Snack', 'Cena'];
@@ -43,7 +89,7 @@ export function calcTargets(profile) {
   const goal = GOALS.find((g) => g.id === profile.goal) || GOALS[1];
   const tdee = Math.round(bmr * activity.factor);
   const minKcal = profile.sex === 'female' ? 1200 : 1500;
-  const computed = Math.max(minKcal, Math.round((tdee + goal.delta) / 10) * 10);
+  const computed = Math.max(minKcal, Math.round(goal.adjust(tdee) / 10) * 10);
   const kcal = Number(profile.customKcal) > 0 ? Number(profile.customKcal) : computed;
 
   const proteinPerKg = goal.id === 'maintain' ? 1.6 : 2.0;
