@@ -2,6 +2,8 @@
 
 Asistente nutricional mobile-first impulsado por visión artificial (MobileNetV3 entrenado sobre **Food-101**, 101 clases de alimentos) y porciones de referencia **USDA**.
 
+**Entrega final (Hito 3):** [Video de presentación y demo del MVP](https://youtu.be/YQqdyIhd7so) · [Backend y notebook de entrenamiento](https://github.com/DANFELcode/ptia-fitqual-ai-back)
+
 Aplicación de seguimiento nutricional: el usuario crea su perfil, recibe metas diarias de calorías y macronutrientes, registra cada plato con una foto y sigue su progreso. No usa cuentas ni base de datos: el estado vive en React y se guarda en `localStorage`.
 
 ---
